@@ -6,7 +6,7 @@ import { isProject } from "@omni-organize/shared";
 import { STATUS_META, formatRelative, type TaskStatus } from "@/lib/engine";
 import type { OmniOrganize } from "@/hooks/useOmniOrganize";
 import { BOARD_MIN_W, HomeBoard } from "./HomeBoard";
-import { ChevronRight, Star, Trash } from "./icons";
+import { ChevronRight, Star } from "./icons";
 
 const STATUS_ORDER: TaskStatus[] = [
   "pendiente",
@@ -167,12 +167,14 @@ function AreaStrip({ app, area }: { app: OmniOrganize; area: Area }) {
               contentEditable
               suppressContentEditableWarning
               onMouseDown={(e) => e.stopPropagation()}
+              onContextMenu={(e) => actions.openAreaMenu(area.id, e)}
               onBlur={(e) => actions.renameArea(area.id, e.currentTarget.innerText)}
               onKeyDown={(e) => {
                 if (e.key !== "Enter") return;
                 e.preventDefault();
                 (e.currentTarget as HTMLElement).blur();
               }}
+              title="Clic derecho para eliminar el área"
               style={{ fontSize: 18, fontWeight: 500, outline: "none", cursor: "text" }}
             >
               {area.name}
@@ -211,6 +213,8 @@ function AreaStrip({ app, area }: { app: OmniOrganize; area: Area }) {
           </div>
         </div>
 
+        {/* Deleting lives inside the dropdown, next to the area it removes —
+            never as a loose icon that wipes whatever area happens to be open. */}
         <div
           style={{
             display: "flex",
@@ -220,13 +224,6 @@ function AreaStrip({ app, area }: { app: OmniOrganize; area: Area }) {
             flexShrink: 0,
           }}
         >
-          <Trash
-            size={16}
-            onClick={(e) => {
-              e.stopPropagation();
-              actions.deleteArea(area.id);
-            }}
-          />
           <button onClick={actions.createArea} style={newAreaBtn}>
             Nueva área
           </button>
@@ -240,10 +237,11 @@ function AreaStrip({ app, area }: { app: OmniOrganize; area: Area }) {
               key={a.id}
               onClick={() => actions.selectArea(a.id)}
               style={{
-                padding: "8px 12px",
+                padding: "8px 14px",
                 borderRadius: 6,
                 cursor: "pointer",
                 fontSize: 13,
+                textAlign: "center",
                 color: a.id === area.id ? "#1c1c1a" : "#55554f",
                 fontWeight: a.id === area.id ? 500 : 400,
                 whiteSpace: "nowrap",
@@ -482,10 +480,16 @@ const areaStripGrid: CSSProperties = {
   alignItems: "center",
 };
 
+/**
+ * The list drops right under the chevron that opens it. Since the name and its
+ * chevron are centered in the strip, centering the menu on the strip puts it
+ * exactly under the arrow.
+ */
 const areaMenuBox: CSSProperties = {
   position: "absolute",
   top: "100%",
-  left: 8,
+  left: "50%",
+  transform: "translateX(-50%)",
   marginTop: 4,
   zIndex: 40,
   minWidth: 200,

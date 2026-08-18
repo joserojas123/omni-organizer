@@ -30,9 +30,18 @@ export function OmniOrganize() {
     if (!req) return "";
     if (req.kind === "objective")
       return state.objectives.find((o) => o.id === req.id)?.name ?? "";
+    if (req.kind === "area") return state.areas.find((a) => a.id === req.id)?.name ?? "";
     return graph.byId(req.id)?.name ?? "";
   })();
-  const confirmingObjective = state.confirmDelete?.kind === "objective";
+
+  /* An area only reaches this dialog when it is already empty — the rule that
+     refuses one with content answers before there is anything to confirm. */
+  const confirmBody = {
+    objective:
+      "Los proyectos vinculados no se eliminan; solo se pierde el vínculo. Puedes revertirlo con Ctrl+Z.",
+    area: "El área está vacía, así que no se pierde ningún proyecto ni objetivo. Puedes revertirlo con Ctrl+Z.",
+    task: "Se eliminarán también todas sus tareas anidadas y desaparecerá de los objetivos que lo tenían vinculado. Puedes revertirlo con Ctrl+Z.",
+  }[state.confirmDelete?.kind ?? "task"];
 
   const menuBlocked =
     menu?.type === "task" && menu.id ? blockers(menu.id).length > 0 : false;
@@ -42,10 +51,19 @@ export function OmniOrganize() {
       ? activeChildren(menu.id).length > 0
       : false;
 
+  /* `bloqueada` never applies to a Project, so it is not even offered there —
+     otherwise setting it by hand would paint a project red, which the model
+     says can never happen. Inside a project, tasks keep the full list. */
+  const menuIsProject =
+    menu?.type === "task" && menu.id ? graph.byId(menu.id)?.parentId === null : false;
+
   const statusOptions =
     menu?.type === "task" && menu.id && !menuBlocked && !menuAutoActive
       ? STATUS_ORDER.filter(
-          (v) => v !== eff(menu.id!) && (v !== "completada" || canComplete(menu.id!)),
+          (v) =>
+            v !== eff(menu.id!) &&
+            (v !== "bloqueada" || !menuIsProject) &&
+            (v !== "completada" || canComplete(menu.id!)),
         )
       : [];
 
@@ -150,9 +168,7 @@ export function OmniOrganize() {
               Eliminar “{confirmName}”
             </div>
             <div style={{ fontSize: 12, lineHeight: 1.5, color: "#8a8a83" }}>
-              {confirmingObjective
-                ? "Los proyectos vinculados no se eliminan; solo se pierde el vínculo. Puedes revertirlo con Ctrl+Z."
-                : "Se eliminarán también todas sus tareas anidadas y desaparecerá de los objetivos que lo tenían vinculado. Puedes revertirlo con Ctrl+Z."}
+              {confirmBody}
             </div>
             <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
               <button onClick={actions.cancelDelete} style={ghostBtn}>
@@ -208,15 +224,33 @@ export function OmniOrganize() {
                   ))}
                 </>
               )}
-              {state.screen === "editor" && (
-                <>
-                  <div style={separator} />
-                  <MenuRow onClick={() => actions.deleteTask(menu.id!)} icon={<Trash size={12} />}>
-                    Eliminar tarea
-                  </MenuRow>
-                </>
+              <div style={separator} />
+              {state.screen === "editor" ? (
+                <MenuRow onClick={() => actions.deleteTask(menu.id!)} icon={<Trash size={12} />}>
+                  Eliminar tarea
+                </MenuRow>
+              ) : (
+                /* On the home board the same node is a Project, and deleting it
+                   takes its whole canvas with it — so it asks first. */
+                <MenuRow
+                  onClick={() => actions.requestDelete({ kind: "task", id: menu.id! })}
+                  icon={<Trash size={12} />}
+                >
+                  Eliminar proyecto
+                </MenuRow>
               )}
             </>
+          )}
+
+          {/* An area has no status to offer — deleting it is the only thing
+              its menu does. */}
+          {menu.type === "area" && menu.id && (
+            <MenuRow
+              onClick={() => actions.requestDeleteArea(menu.id!)}
+              icon={<Trash size={12} />}
+            >
+              Eliminar área
+            </MenuRow>
           )}
 
           {menu.type === "objective" && menu.id && (

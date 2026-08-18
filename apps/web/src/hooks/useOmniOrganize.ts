@@ -77,7 +77,7 @@ export interface HomeDrag {
 }
 
 export interface ContextMenu {
-  type: "task" | "canvas" | "objective";
+  type: "task" | "canvas" | "objective" | "area";
   id?: string;
   x: number;
   y: number;
@@ -95,7 +95,7 @@ export interface LinkDialog {
 }
 
 export interface DeleteRequest {
-  kind: "task" | "objective";
+  kind: "task" | "objective" | "area";
   id: string;
 }
 
@@ -232,7 +232,7 @@ export interface Actions {
   renameArea: (id: string, name: string) => void;
   describeArea: (id: string, description: string) => void;
   stopEditAreaName: () => void;
-  deleteArea: (id: string) => void;
+  requestDeleteArea: (id: string) => void;
   /* projects */
   createProject: () => void;
   linkProjects: (fromId: string, toId: string) => void;
@@ -268,6 +268,7 @@ export interface Actions {
   /* canvas */
   openContextMenu: (id: string, e: React.MouseEvent) => void;
   openHomeMenu: (id: string, e: React.MouseEvent) => void;
+  openAreaMenu: (id: string, e: React.MouseEvent) => void;
   openObjectiveMenu: (id: string, e: React.MouseEvent) => void;
   onCanvasContextMenu: (e: React.MouseEvent) => void;
   onCanvasMouseDown: (e: React.MouseEvent) => void;
@@ -560,8 +561,28 @@ export function useOmniOrganize(): OmniOrganize {
   );
 
   /**
+   * Asks before removing an area — but only when removing it is possible at
+   * all. An area with content is refused outright, so there is nothing to
+   * confirm: the reason is shown instead.
+   */
+  const requestDeleteArea = useCallback(
+    (id: string) => {
+      const s = stateRef.current;
+      const reason = canDeleteArea(id, s.tasks, s.objectives);
+      setState({ areaMenuOpen: false, contextMenu: null });
+      if (reason) {
+        notify(reason);
+        return;
+      }
+      setState({ confirmDelete: { kind: "area", id } });
+    },
+    [notify, setState],
+  );
+
+  /**
    * An area with content is never deleted — no cascade, no reassignment. The
-   * check lives in the domain layer and the UI only relays its reason.
+   * check lives in the domain layer and is repeated here on purpose: this runs
+   * after the confirmation dialog, and the graph may have changed meanwhile.
    */
   const deleteArea = useCallback(
     (id: string) => {
@@ -863,7 +884,7 @@ export function useOmniOrganize(): OmniOrganize {
   );
 
   const requestDelete = useCallback(
-    (req: DeleteRequest) => setState({ confirmDelete: req }),
+    (req: DeleteRequest) => setState({ confirmDelete: req, contextMenu: null }),
     [setState],
   );
   const cancelDelete = useCallback(() => setState({ confirmDelete: null }), [setState]);
@@ -873,10 +894,11 @@ export function useOmniOrganize(): OmniOrganize {
     const fromEditor =
       stateRef.current.screen === "editor" && req.id === stateRef.current.editingTaskId;
     if (req.kind === "objective") deleteObjective(req.id);
+    else if (req.kind === "area") deleteArea(req.id);
     else deleteTask(req.id);
     setState({ confirmDelete: null });
     if (fromEditor) goHome();
-  }, [deleteTask, deleteObjective, setState, goHome]);
+  }, [deleteTask, deleteObjective, deleteArea, setState, goHome]);
 
   /* ── name editing (contentEditable + link dialog) ──────────────────── */
   const onEditingNameChange = useCallback(
@@ -1116,6 +1138,27 @@ export function useOmniOrganize(): OmniOrganize {
           localX: 20,
           localY: 20,
         },
+      });
+    },
+    [setState],
+  );
+
+  /** Right-clicking the area name — the only place an area can be deleted. */
+  const openAreaMenu = useCallback(
+    (id: string, e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setState({
+        contextMenu: {
+          type: "area",
+          id,
+          x: e.clientX,
+          y: e.clientY,
+          parentId: null,
+          localX: 0,
+          localY: 0,
+        },
+        areaMenuOpen: false,
       });
     },
     [setState],
@@ -1744,7 +1787,7 @@ export function useOmniOrganize(): OmniOrganize {
     renameArea,
     describeArea,
     stopEditAreaName,
-    deleteArea,
+    requestDeleteArea,
     createProject,
     linkProjects,
     unlinkProjects,
@@ -1774,6 +1817,7 @@ export function useOmniOrganize(): OmniOrganize {
     onLinkKeyDown,
     openContextMenu,
     openHomeMenu,
+    openAreaMenu,
     openObjectiveMenu,
     onCanvasContextMenu,
     onCanvasMouseDown,
