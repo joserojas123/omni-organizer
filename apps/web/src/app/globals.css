@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    height: 100%;
+  }
+  body {
+    margin: 0;
+    background: #f7f7f6;
+    color: #1c1c1a;
+    font-family:
+      var(--font-inter), "Helvetica Neue", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection {
+    background: #d6e4ff;
+  }
+  a {
+    color: #2563eb;
+    text-decoration: underline;
+    /* Links only ever appear inside a task card's name; the card itself
+       decides the cursor (grab while draggable), not the browser's default
+       hand cursor for anchors. */
+    cursor: inherit;
+  }
+  a:hover {
+    color: #1d4ed8;
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "@omni-organize/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "dev": "concurrently -k \"pnpm --filter web dev\" \"wait-on http://localhost:3000 && electron .\"",
+    "build": "pnpm --filter web build && electron-builder"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8",
+    "wait-on": "^8.0.1"
+  },
+  "dependencies": {
+    "serve-handler": "^6.1.6"
+  },
+  "build": {
+    "appId": "com.omniorganize.desktop",
+    "productName": "Omni organize",
+    "files": ["main.js", "package.json"],
+    "extraResources": [{ "from": "../web/out", "to": "web-out" }],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    }
+  }
+}

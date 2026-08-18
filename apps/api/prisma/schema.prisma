@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// The ceiling of the hierarchy. An area holds projects and objectives, never
+/// another area, and has no status of its own. Both relations use
+/// `onDelete: Restrict`: an area with content is never deleted, so the database
+/// refuses it even if a caller gets past the service layer.
+model Area {
+  id          String      @id @default(cuid())
+  name        String      @default("Sin nombre")
+  description String?
+  modifiedAt  BigInt      @map("modified_at")
+  tasks       Task[]
+  objectives  Objective[]
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  @@map("areas")
+}
+
+/// The single canvas entity. Self-similar: a task with no parent is a Project,
+/// the root of a canvas and the only task that belongs directly to an Area.
+/// Composition is the self-relation; sequence (arrows) is stored as an array of
+/// target task ids in `seqNext`.
+///
+/// `area_id` is nullable in the column because nested tasks have none — they
+/// inherit their Area from the project above them. The "a project always has an
+/// area" rule is enforced in the service layer, which can see the whole graph.
+model Task {
+  id         String   @id @default(cuid())
+  name       String   @default("Sin nombre")
+  status     String   @default("pendiente")
+  favorite   Boolean  @default(false)
+  modifiedAt BigInt    @map("modified_at")
+  parentId   String?  @map("parent_id")
+  parent     Task?    @relation("TaskChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  children   Task[]   @relation("TaskChildren")
+  areaId     String?  @map("area_id")
+  area       Area?    @relation(fields: [areaId], references: [id], onDelete: Restrict)
+  seqNext    String[] @map("seq_next")
+  x          Float    @default(60)
+  y          Float    @default(60)
+  collapsed  Boolean  @default(false)
+  minW       Float?   @map("min_w")
+  minH       Float?   @map("min_h")
+  nameHtml   String?  @map("name_html")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@index([parentId])
+  @@index([areaId])
+  @@map("tasks")
+}
+
+/// A desired outcome inside an area. It never lives on a canvas: no parent, no
+/// coordinates, no sequence. The link to the projects that feed it is stored on
+/// one side only, here, in `linked_project_ids` — the same convention `seqNext`
+/// follows.
+model Objective {
+  id               String   @id @default(cuid())
+  name             String   @default("Sin nombre")
+  nameHtml         String?  @map("name_html")
+  areaId           String   @map("area_id")
+  area             Area     @relation(fields: [areaId], references: [id], onDelete: Restrict)
+  status           String   @default("activo")
+  linkedProjectIds String[] @map("linked_project_ids")
+  favorite         Boolean  @default(false)
+  modifiedAt       BigInt   @map("modified_at")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@index([areaId])
+  @@map("objectives")
+}

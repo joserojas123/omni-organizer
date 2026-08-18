@@ -1,0 +1,27 @@
+name: omni-organize-dev
+
+# Local development dependencies only. PostgreSQL is the single backing store
+# for the API. Bring it up with `pnpm db:up` (or docker-compose up -d).
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: omni-organize-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: omniorganize
+      POSTGRES_PASSWORD: omniorganize
+      POSTGRES_DB: omniorganize
+    ports:
+      # Host 5433 to avoid clashing with other local Postgres instances (e.g. famrize on 5432).
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U omniorganize -d omniorganize"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
