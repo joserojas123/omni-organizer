@@ -607,9 +607,11 @@ export function useOmniOrganize(): OmniOrganize {
       collapsed: false,
     };
     snapshot();
-    setState((s) => ({ tasks: [...s.tasks, t] }));
-    openEditor(id);
-  }, [snapshot, setState, openEditor]);
+    // Creating a project does NOT jump into the canvas: the card appears in the
+    // column with its name ready to type, exactly like a new objective. The
+    // editor is still one double click away.
+    setState((s) => ({ tasks: [...s.tasks, t], editingNameId: id }));
+  }, [snapshot, setState]);
 
   const linkProjects = useCallback(
     (fromId: string, toId: string) => {

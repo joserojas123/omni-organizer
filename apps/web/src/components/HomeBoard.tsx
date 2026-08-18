@@ -427,13 +427,14 @@ function ProjectCard({
   project: Task;
   status: TaskStatus;
 }) {
-  const { graph, actions } = app;
+  const { state, graph, actions, setNameEl } = app;
   const { eff } = graph.statusResolver();
   const children = graph.getChildren(project.id);
   const done = children.filter((c) => eff(c.id) === "completada").length;
   const pct = children.length ? Math.round((done / children.length) * 100) : 0;
   // Red never shows up in this column: a project is never `bloqueada`.
   const meta = STATUS_META[status];
+  const editing = state.editingNameId === project.id;
 
   return (
     <div
@@ -447,13 +448,32 @@ function ProjectCard({
     >
       <div style={statusBand(meta.color)} />
       <div style={rowTop}>
-        <span
-          title={project.name}
-          style={cardName}
-          dangerouslySetInnerHTML={{
-            __html: project.nameHtml || escapeHtml(project.name),
-          }}
-        />
+        {editing ? (
+          <div
+            contentEditable
+            suppressContentEditableWarning
+            ref={setNameEl}
+            onBlur={(e) => {
+              if (!state.linkDialog) actions.commitNameHtml(project.id, e.currentTarget);
+            }}
+            onKeyDown={(e) => actions.onNameKeyDown(project.id, e)}
+            onPaste={actions.onNamePaste}
+            onMouseDown={(e) => e.stopPropagation()}
+            // Double clicking to select a word must not open the editor.
+            onDoubleClick={(e) => e.stopPropagation()}
+            onContextMenu={(e) => actions.onNameContextMenu(project.id, e)}
+            title="Selecciona texto y presiona Ctrl/Cmd + K (o clic derecho) para enlazar"
+            style={{ ...cardName, outline: "none", userSelect: "text" }}
+          />
+        ) : (
+          <span
+            title={project.name}
+            style={cardName}
+            dangerouslySetInnerHTML={{
+              __html: project.nameHtml || escapeHtml(project.name),
+            }}
+          />
+        )}
         <Star
           size={15}
           fill={project.favorite ? "#1c1c1a" : "none"}
