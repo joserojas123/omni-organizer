@@ -70,18 +70,26 @@ Requiere Node ≥ 20, pnpm ≥ 9 y Docker corriendo.
    falla si el daemon de Docker no está corriendo.
 
 3. **Levanta PostgreSQL** con Docker Compose. Queda escuchando en
-   `localhost:5433` (puerto distinto del 5432 por defecto, para no chocar con
+   `localhost:5434` (puerto propio, para no chocar con
    otras instancias locales):
 
    ```bash
    pnpm db:up
    ```
 
-   Verifica que el contenedor esté sano antes de continuar:
+   Espera a que el contenedor pase a `healthy` antes de continuar — el paso 5
+   falla si Postgres todavía no acepta conexiones:
 
    ```bash
    docker ps --filter name=omni-organize-postgres
    ```
+
+   > Si falla con `Bind for 0.0.0.0:5434 failed: port is already allocated`,
+   > tienes otro Postgres ocupando ese puerto. Míralo con
+   > `docker ps --format "{{.Names}} {{.Ports}}"` y, o paras ese contenedor, o
+   > cambias el puerto del host en `docker-compose.dev.yml` y en el
+   > `DATABASE_URL` de `apps/api/.env` (los dos a la vez, o Prisma apuntará al
+   > sitio equivocado).
 
 4. **Configura las variables de entorno** copiando los ejemplos:
 
@@ -92,8 +100,16 @@ Requiere Node ≥ 20, pnpm ≥ 9 y Docker corriendo.
 
    - `apps/api/.env` ya viene apuntando al Postgres del paso 3
      (`DATABASE_URL`), con `PORT=4000` y `CORS_ORIGIN=http://localhost:3000`.
+     Si cambias el puerto de la web, cambia también `CORS_ORIGIN` o el
+     navegador bloqueará las peticiones.
    - `apps/web/.env.local` define `NEXT_PUBLIC_API_URL=http://localhost:4000/api`
      para que el frontend hable con la API en vez de usar `localStorage`.
+
+   > Ojo con el cambio de modo: en cuanto defines `NEXT_PUBLIC_API_URL`, la app
+   > carga de la API y **sobrescribe la caché local**. Lo que tuvieras guardado
+   > en `localStorage` del modo sin backend no se migra a Postgres — la base
+   > arranca vacía. El `localStorage` pasa a ser solo caché de respaldo para
+   > cuando la API no responde.
 
 5. **Aplica las migraciones de Prisma** (la app arranca vacía, sin áreas ni datos de
    ejemplo):
@@ -112,8 +128,29 @@ Requiere Node ≥ 20, pnpm ≥ 9 y Docker corriendo.
    - API → http://localhost:4000/api
    - Healthcheck → http://localhost:4000/api/health
 
-7. **Inspecciona la base de datos** (opcional). Postgres no habla HTTP, así
-   que no puedes visitar `http://localhost:5433/` en el navegador — usa uno
+   La primera compilación de Next tarda unos segundos; hasta que no imprime
+   `✓ Compiled /`, el `3000` no responde.
+
+7. **Comprueba que el circuito completo funciona.** Las tres colecciones deben
+   responder con listas (vacías en una instalación nueva):
+
+   ```bash
+   curl http://localhost:4000/api/health
+   curl http://localhost:4000/api/areas
+   curl http://localhost:4000/api/tasks
+   curl http://localhost:4000/api/objectives
+   ```
+
+   Y la prueba de fuego: crea un área en la web, espera al toast "Guardado" y
+   confirma que llegó a Postgres, no solo al navegador:
+
+   ```bash
+   docker exec omni-organize-postgres \
+     psql -U omniorganize -d omniorganize -c "SELECT id, name FROM areas;"
+   ```
+
+8. **Inspecciona la base de datos** (opcional). Postgres no habla HTTP, así
+   que no puedes visitar `http://localhost:5434/` en el navegador — usa uno
    de estos dos caminos:
 
    - **Prisma Studio** (UI web, la forma más simple):
@@ -129,19 +166,26 @@ Requiere Node ≥ 20, pnpm ≥ 9 y Docker corriendo.
      conectando con la cadena de conexión de `apps/api/.env`:
 
      ```
-     postgresql://omniorganize:omniorganize@localhost:5433/omniorganize?schema=public
+     postgresql://omniorganize:omniorganize@localhost:5434/omniorganize?schema=public
      ```
 
-     o por campos separados: host `localhost`, puerto `5433`, usuario y
+     o por campos separados: host `localhost`, puerto `5434`, usuario y
      contraseña `omniorganize`, base de datos `omniorganize`.
 
-8. **Para detener todo**: `Ctrl+C` en el proceso de `pnpm dev`, luego
-   `pnpm db:down` para apagar el contenedor de Postgres (los datos persisten
-   en el volumen `postgres_data` entre reinicios), y finalmente puedes cerrar
-   Docker Desktop.
+9. **Para detener todo**: `Ctrl+C` en el proceso de `pnpm dev`, luego
+   `pnpm db:down` para apagar el contenedor de Postgres, y finalmente puedes
+   cerrar Docker Desktop.
+
+   Los datos **sobreviven** a `pnpm db:down` porque viven en el volumen
+   `omni-organize-dev_postgres_data`, no en el contenedor. Para borrarlos de
+   verdad hace falta tumbar también el volumen:
+
+   ```bash
+   docker compose -f docker-compose.dev.yml down -v   # ⚠️ borra todos los datos
+   ```
 
 > Atajo útil: `pnpm --filter @omni-organize/api db:reset` recrea la base de
-> datos desde cero (vacía).
+> datos desde cero (vacía) sin tocar el contenedor.
 
 La API expone:
 

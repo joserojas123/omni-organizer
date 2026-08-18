@@ -13,8 +13,9 @@ services:
       POSTGRES_PASSWORD: omniorganize
       POSTGRES_DB: omniorganize
     ports:
-      # Host 5433 to avoid clashing with other local Postgres instances (e.g. famrize on 5432).
-      - "5433:5432"
+      # Host 5434 to avoid clashing with other local Postgres instances (famrize on 5432,
+      # task-designer on 5433).
+      - "5434:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:

@@ -16,7 +16,7 @@ async function bootstrap() {
 
   const port = Number(process.env.PORT ?? 4000);
   await app.listen(port);
-  new Logger("Bootstrap").log(`Task designer API listening on :${port}/api`);
+  new Logger("Bootstrap").log(`Omni organize API listening on :${port}/api`);
 }
 
 void bootstrap();
