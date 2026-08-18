@@ -127,7 +127,6 @@ export interface State {
   editingObjectiveNameId: string | null;
   contextMenu: ContextMenu | null;
   dropTargetId: string | null;
-  toast: string | null;
   notice: string | null;
   confirmDelete: DeleteRequest | null;
   homeFilter: TaskStatus;
@@ -158,7 +157,6 @@ interface Ext {
   expandFor: string | null;
   expandTimer: ReturnType<typeof setTimeout> | null;
   saveTimer: ReturnType<typeof setTimeout> | null;
-  toastTimer: ReturnType<typeof setTimeout> | null;
   noticeTimer: ReturnType<typeof setTimeout> | null;
   panTimer: ReturnType<typeof setInterval> | null;
   panVec: { x: number; y: number } | null;
@@ -188,7 +186,6 @@ function initialState(): State {
     editingObjectiveNameId: null,
     contextMenu: null,
     dropTargetId: null,
-    toast: null,
     notice: null,
     confirmDelete: null,
     homeFilter: "en_progreso",
@@ -308,7 +305,6 @@ export function useOmniOrganize(): OmniOrganize {
     expandFor: null,
     expandTimer: null,
     saveTimer: null,
-    toastTimer: null,
     noticeTimer: null,
     panTimer: null,
     panVec: null,
@@ -1687,11 +1683,11 @@ export function useOmniOrganize(): OmniOrganize {
         tasks: s.tasks,
         objectives: s.objectives,
       };
+      // Saving is silent on purpose: every change keeps syncing on its own, but
+      // it does not announce itself. Only a *refused* operation speaks up, via
+      // `notice`.
       void saveAll(snap, ext.saved);
       ext.saved = snap;
-      setState({ toast: "Guardado" });
-      if (ext.toastTimer) clearTimeout(ext.toastTimer);
-      ext.toastTimer = setTimeout(() => setState({ toast: null }), 1200);
     }, 400);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.areas, state.tasks, state.objectives]);

@@ -9,7 +9,7 @@ import {
 import { STATUS_META, type TaskStatus } from "@/lib/engine";
 import { HomeScreen } from "./HomeScreen";
 import { EditorScreen } from "./EditorScreen";
-import { Check, Plus, Trash } from "./icons";
+import { Plus, Trash } from "./icons";
 
 const STATUS_ORDER: TaskStatus[] = [
   "pendiente",
@@ -72,30 +72,9 @@ export function OmniOrganize() {
     >
       {state.screen === "home" ? <HomeScreen app={app} /> : <EditorScreen app={app} />}
 
-      {/* ── Toast ── */}
-      {state.toast && (
-        <div
-          style={{
-            position: "fixed",
-            top: 96,
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 70,
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            background: "#1c1c1a",
-            color: "#fff",
-            borderRadius: 999,
-            padding: "8px 16px",
-            fontSize: 12,
-            boxShadow: "0 6px 20px rgba(0,0,0,0.16)",
-          }}
-        >
-          <Check />
-          {state.toast}
-        </div>
-      )}
+      {/* No hay aviso de "Guardado": el guardado es silencioso y automático.
+          El único mensaje flotante es el de abajo, que explica por qué se
+          rechazó una operación. */}
 
       {/* ── Notice: why an operation was refused ── */}
       {state.notice && (
