@@ -187,6 +187,27 @@ Requiere Node ≥ 20, pnpm ≥ 9 y Docker corriendo.
 > Atajo útil: `pnpm --filter @omni-organize/api db:reset` recrea la base de
 > datos desde cero (vacía) sin tocar el contenedor.
 
+### Problemas frecuentes
+
+- **`EADDRINUSE: address already in use :::4000`** — quedó un proceso Node de
+  una ejecución anterior. `Ctrl+C` sobre Turborepo no siempre se lleva a los
+  hijos. En Windows:
+
+  ```powershell
+  Get-NetTCPConnection -LocalPort 4000 -State Listen |
+    ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }
+  ```
+
+- **Editas código con `pnpm dev` corriendo y "se pierde" algo que acababas de
+  crear en la web.** Tocar `apps/api` reinicia Nest y tocar `apps/web` recarga
+  la página; si el guardado (que va con 400 ms de retardo) cae justo en esa
+  ventana, se pierde. No es un fallo de la base: recarga y sigue.
+
+- **La web muestra datos que no están en Postgres.** Si la API no responde,
+  `loadAll` cae a la caché de `localStorage` y `saveAll` se traga el error en
+  silencio — el toast dice "Guardado" aunque solo se haya escrito en el
+  navegador. Comprueba primero `curl http://localhost:4000/api/health`.
+
 La API expone:
 
 | Método | Ruta | Descripción |
