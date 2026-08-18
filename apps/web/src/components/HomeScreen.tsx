@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import type { Area } from "@omni-organize/shared";
 import { isProject } from "@omni-organize/shared";
 import { STATUS_META, formatRelative, type TaskStatus } from "@/lib/engine";
@@ -137,13 +137,33 @@ export function HomeScreen({ app }: { app: OmniOrganize }) {
 function AreaStrip({ app, area }: { app: OmniOrganize; area: Area }) {
   const { state, actions } = app;
   const others = [...state.areas].sort((a, b) => b.modifiedAt - a.modifiedAt);
+  const nameRef = useRef<HTMLSpanElement | null>(null);
+  const wantsFocus = state.editingAreaNameId === area.id;
+
+  /* A freshly created area opens with its placeholder name selected, so typing
+     replaces it in one go instead of forcing a manual select-all. */
+  useEffect(() => {
+    const el = nameRef.current;
+    if (!wantsFocus || !el) return;
+    el.focus();
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const sel = window.getSelection();
+    sel?.removeAllRanges();
+    sel?.addRange(range);
+    actions.stopEditAreaName();
+  }, [wantsFocus, actions]);
 
   return (
     <div style={{ position: "relative" }}>
-      <div style={areaStripBox}>
-        <div style={{ minWidth: 0 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+      <div style={areaStripGrid}>
+        {/* Empty first grid track: it mirrors the controls on the right so the
+            name lands dead center of the strip, not center of the free space. */}
+        <div />
+        <div style={{ minWidth: 0, textAlign: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
             <span
+              ref={nameRef}
               contentEditable
               suppressContentEditableWarning
               onMouseDown={(e) => e.stopPropagation()}
@@ -191,7 +211,15 @@ function AreaStrip({ app, area }: { app: OmniOrganize; area: Area }) {
           </div>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            gap: 10,
+            flexShrink: 0,
+          }}
+        >
           <Trash
             size={16}
             onClick={(e) => {
@@ -425,15 +453,33 @@ function ActivitiesByStatus({ app, areaName }: { app: OmniOrganize; areaName: st
   );
 }
 
-const areaStripBox: CSSProperties = {
-  display: "flex",
-  alignItems: "flex-start",
-  justifyContent: "space-between",
+const areaStripBase: CSSProperties = {
   gap: 16,
   background: AREA_TINT,
   border: "0.5px solid #cfe0cf",
   borderRadius: 12,
   padding: "14px 16px",
+};
+
+/** Empty state: nothing to center, so the text sits left and the button right. */
+const areaStripBox: CSSProperties = {
+  ...areaStripBase,
+  display: "flex",
+  alignItems: "flex-start",
+  justifyContent: "space-between",
+};
+
+/**
+ * With an area selected the name is centered in the strip. The two `1fr` tracks
+ * are what centers it: the empty one on the left balances the controls on the
+ * right, so the name is centered against the whole strip rather than against
+ * the space the buttons happen to leave.
+ */
+const areaStripGrid: CSSProperties = {
+  ...areaStripBase,
+  display: "grid",
+  gridTemplateColumns: "minmax(0,1fr) auto minmax(0,1fr)",
+  alignItems: "center",
 };
 
 const areaMenuBox: CSSProperties = {

@@ -108,6 +108,12 @@ export interface State {
   /** The home screen always shows one concrete area — there is no "all areas". */
   currentAreaId: string | null;
   areaMenuOpen: boolean;
+  /**
+   * One-shot trigger: the id of an area whose name should grab focus with its
+   * text selected. Set when the area is created so the placeholder can be typed
+   * straight over; the strip clears it as soon as it has focused the field.
+   */
+  editingAreaNameId: string | null;
   search: string;
   favoritesOnly: boolean;
   offset: { x: number; y: number };
@@ -168,6 +174,7 @@ function initialState(): State {
     objectives: seed.objectives,
     currentAreaId: null,
     areaMenuOpen: false,
+    editingAreaNameId: null,
     search: "",
     favoritesOnly: false,
     offset: { x: 0, y: 0 },
@@ -227,6 +234,7 @@ export interface Actions {
   closeAreaMenu: () => void;
   renameArea: (id: string, name: string) => void;
   describeArea: (id: string, description: string) => void;
+  stopEditAreaName: () => void;
   deleteArea: (id: string) => void;
   /* projects */
   createProject: () => void;
@@ -501,13 +509,20 @@ export function useOmniOrganize(): OmniOrganize {
       modifiedAt: Date.now(),
     };
     snapshot();
-    // Creating an area jumps straight to it, with both columns empty.
+    // Creating an area jumps straight to it, with both columns empty, and hands
+    // the name the caret with its placeholder selected — the first thing anyone
+    // does with a new area is name it.
     setState((s) => ({
       areas: [...s.areas, area],
       currentAreaId: id,
       areaMenuOpen: false,
+      editingAreaNameId: id,
     }));
   }, [snapshot, setState]);
+
+  const stopEditAreaName = useCallback(() => {
+    if (stateRef.current.editingAreaNameId) setState({ editingAreaNameId: null });
+  }, [setState]);
 
   const selectArea = useCallback(
     (id: string) => setState({ currentAreaId: id, areaMenuOpen: false }),
@@ -1730,6 +1745,7 @@ export function useOmniOrganize(): OmniOrganize {
     closeAreaMenu,
     renameArea,
     describeArea,
+    stopEditAreaName,
     deleteArea,
     createProject,
     linkProjects,
