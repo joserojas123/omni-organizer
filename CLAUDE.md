@@ -118,9 +118,12 @@ vínculo. `areaId` es inmutable después de crear.
 - Rejilla de cuatro franjas: canal de secuencia (44 px) · Proyectos (1fr) ·
   canal de vínculo (56 px) · Objetivos (1fr). Las dos columnas de contenido son
   iguales.
-- Tarjetas de **altura fija (92 px)**: es lo que le da a cada curva un punto de
-  anclaje predecible, así que la geometría de `HomeBoard` es aritmética pura,
-  sin medir un solo nodo del DOM. Si cambias la altura o el hueco, cambia ahí.
+- Tarjetas de **altura mínima (92 px)**, no fija: el nombre de un Proyecto o de
+  un Objetivo **nunca se recorta**, se reparte en las líneas que haga falta y la
+  tarjeta crece. Como las alturas varían, `HomeBoard` **mide** el centro de cada
+  tarjeta (`offsetTop`/`offsetHeight`) en un `useLayoutEffect` y ancla ahí las
+  curvas; la aritmética por índice solo se usa como respaldo en el primer
+  pintado, antes de medir.
 - Curvas **bézier siempre**, nunca ángulos rectos: con punta de flecha en el
   canal de secuencia (el orden importa) y **sin** punta en el de vínculo (no
   tiene dirección de ejecución).

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import type { Objective, Task, TaskStatus } from "@omni-organize/shared";
 import { OBJECTIVE_STATUS_META } from "@omni-organize/shared";
@@ -17,13 +17,15 @@ import { Star } from "./icons";
  *   │ seq  │  1fr          │ link │  1fr          │
  *   └──────┴───────────────┴──────┴───────────────┘
  *
- * Cards have a fixed height on purpose: it gives every curve a predictable
- * anchor without measuring a single DOM node, so the geometry below is plain
- * arithmetic. Curves are always béziers — never right angles or steps — the
- * same rule the canvas follows.
+ * Cards share a minimum height, but a long name wraps instead of being cut —
+ * a project or objective always shows its full name. That makes heights vary,
+ * so the curve anchors are measured from the laid-out cards rather than
+ * computed from an index. Curves are always béziers — never right angles or
+ * steps — the same rule the canvas follows.
  */
 export const SEQ_CHANNEL = 44;
 export const LINK_CHANNEL = 56;
+/** Minimum card height; a card grows when its name needs more lines. */
 export const CARD_H = 92;
 export const CARD_GAP = 12;
 /** Below this the columns would collapse, so the board scrolls sideways instead. */
@@ -31,8 +33,9 @@ export const BOARD_MIN_W = 900;
 
 const GRID_COLUMNS = `${SEQ_CHANNEL}px minmax(0,1fr) ${LINK_CHANNEL}px minmax(0,1fr)`;
 
-/** Vertical center of the card at index `i`, in board coordinates. */
-function anchorY(i: number): number {
+/** Where the card at index `i` would sit if every card were the minimum
+ *  height. Used only for the very first paint, before anything is measured. */
+function fallbackY(i: number): number {
   return i * (CARD_H + CARD_GAP) + CARD_H / 2;
 }
 
@@ -48,7 +51,17 @@ export function HomeBoard({
   const { state, graph, actions, setBoardEl } = app;
   const { eff } = graph.statusResolver();
   const elRef = useRef<HTMLDivElement | null>(null);
+  const colsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const cardEls = useRef<Map<string, HTMLElement>>(new Map());
   const [width, setWidth] = useState(0);
+  /** Measured vertical center of each card, in board coordinates. */
+  const [anchors, setAnchors] = useState<Record<string, number>>({});
+  const [measuredH, setMeasuredH] = useState(0);
+
+  const registerCard = useCallback((id: string, el: HTMLElement | null) => {
+    if (el) cardEls.current.set(id, el);
+    else cardEls.current.delete(id);
+  }, []);
 
   const attachBoard = useCallback(
     (el: HTMLDivElement | null) => {
@@ -67,24 +80,55 @@ export function HomeBoard({
     return () => ro.disconnect();
   }, []);
 
+  /* Re-measure after every render: a name that rewraps changes a card's height
+     and therefore where its curve has to attach. Both setters bail out when
+     nothing moved, so this settles in one pass instead of looping. */
+  useLayoutEffect(() => {
+    const next: Record<string, number> = {};
+    let bottom = 0;
+    cardEls.current.forEach((el, id) => {
+      if (!el.isConnected) return;
+      next[id] = el.offsetTop + el.offsetHeight / 2;
+      bottom = Math.max(bottom, el.offsetTop + el.offsetHeight);
+    });
+    setAnchors((prev) => {
+      const keys = Object.keys(next);
+      const same =
+        keys.length === Object.keys(prev).length && keys.every((k) => prev[k] === next[k]);
+      return same ? prev : next;
+    });
+    setMeasuredH((prev) => (prev === bottom ? prev : bottom));
+  });
+
+  /* Fonts landing late rewrap a name without any re-render, so watch the two
+     columns: their height changes whenever a card does. */
+  useEffect(() => {
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() => setWidth((w) => w));
+    colsRef.current.forEach((c) => c && ro.observe(c));
+    return () => ro.disconnect();
+  }, []);
+
   const colW = Math.max(120, (width - SEQ_CHANNEL - LINK_CHANNEL) / 2);
   const projectIndex = new Map(projects.map((p, i) => [p.id, i]));
   const objectiveIndex = new Map(objectives.map((o, i) => [o.id, i]));
   const rows = Math.max(projects.length, objectives.length);
-  const boardH = rows ? rows * (CARD_H + CARD_GAP) - CARD_GAP : 0;
+  const boardH = measuredH || (rows ? rows * (CARD_H + CARD_GAP) - CARD_GAP : 0);
 
   /* Anchors: the round connection points on the card edges. */
+  const yOf = (id: string, index: number) => anchors[id] ?? fallbackY(index);
+
   const seqAnchor = (id: string) => ({
     x: SEQ_CHANNEL,
-    y: anchorY(projectIndex.get(id) ?? 0),
+    y: yOf(id, projectIndex.get(id) ?? 0),
   });
   const projectLinkAnchor = (id: string) => ({
     x: SEQ_CHANNEL + colW,
-    y: anchorY(projectIndex.get(id) ?? 0),
+    y: yOf(id, projectIndex.get(id) ?? 0),
   });
   const objectiveAnchor = (id: string) => ({
     x: SEQ_CHANNEL + colW + LINK_CHANNEL,
-    y: anchorY(objectiveIndex.get(id) ?? 0),
+    y: yOf(id, objectiveIndex.get(id) ?? 0),
   });
 
   /* ── Curves ────────────────────────────────────────────────────────── */
@@ -298,15 +342,36 @@ export function HomeBoard({
 
         <div style={{ display: "grid", gridTemplateColumns: GRID_COLUMNS }}>
           <div />
-          <div style={{ display: "flex", flexDirection: "column", gap: CARD_GAP }}>
+          <div
+            ref={(el) => {
+              colsRef.current[0] = el;
+            }}
+            style={{ display: "flex", flexDirection: "column", gap: CARD_GAP }}
+          >
             {projects.map((p) => (
-              <ProjectCard key={p.id} app={app} project={p} status={eff(p.id)} />
+              <ProjectCard
+                key={p.id}
+                app={app}
+                project={p}
+                status={eff(p.id)}
+                register={registerCard}
+              />
             ))}
           </div>
           <div />
-          <div style={{ display: "flex", flexDirection: "column", gap: CARD_GAP }}>
+          <div
+            ref={(el) => {
+              colsRef.current[1] = el;
+            }}
+            style={{ display: "flex", flexDirection: "column", gap: CARD_GAP }}
+          >
             {objectives.map((o) => (
-              <ObjectiveCard key={o.id} app={app} objective={o} />
+              <ObjectiveCard
+                key={o.id}
+                app={app}
+                objective={o}
+                register={registerCard}
+              />
             ))}
           </div>
         </div>
@@ -377,7 +442,9 @@ function ConnectionPoint({
 function cardShell(highlight: "none" | "on" | "invalid"): CSSProperties {
   return {
     position: "relative",
-    height: CARD_H,
+    // Minimum, not fixed: the name wraps to as many lines as it needs and the
+    // card grows with it, so a name is never cut short.
+    minHeight: CARD_H,
     boxSizing: "border-box",
     background: "#fff",
     borderRadius: 12,
@@ -422,10 +489,12 @@ function ProjectCard({
   app,
   project,
   status,
+  register,
 }: {
   app: OmniOrganize;
   project: Task;
   status: TaskStatus;
+  register: (id: string, el: HTMLElement | null) => void;
 }) {
   const { state, graph, actions, setNameEl } = app;
   const { eff } = graph.statusResolver();
@@ -438,6 +507,7 @@ function ProjectCard({
 
   return (
     <div
+      ref={(el) => register(project.id, el)}
       data-card-kind="project"
       data-card-id={project.id}
       onContextMenu={(e) => actions.openHomeMenu(project.id, e)}
@@ -505,7 +575,15 @@ function ProjectCard({
   );
 }
 
-function ObjectiveCard({ app, objective }: { app: OmniOrganize; objective: Objective }) {
+function ObjectiveCard({
+  app,
+  objective,
+  register,
+}: {
+  app: OmniOrganize;
+  objective: Objective;
+  register: (id: string, el: HTMLElement | null) => void;
+}) {
   const { state, graph, actions, setNameEl } = app;
   const { eff } = graph.statusResolver();
   const meta = OBJECTIVE_STATUS_META[objective.status];
@@ -515,6 +593,7 @@ function ObjectiveCard({ app, objective }: { app: OmniOrganize; objective: Objec
 
   return (
     <div
+      ref={(el) => register(objective.id, el)}
       data-card-kind="objective"
       data-card-id={objective.id}
       onContextMenu={(e) => actions.openObjectiveMenu(objective.id, e)}
@@ -591,9 +670,10 @@ const cardName: CSSProperties = {
   color: "#1c1c1a",
   flex: 1,
   minWidth: 0,
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
+  // Wraps instead of truncating: a project or objective always shows its full
+  // name, however long it is.
+  whiteSpace: "normal",
+  overflowWrap: "break-word",
 };
 
 const cardMeta: CSSProperties = {
