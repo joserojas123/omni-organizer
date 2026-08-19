@@ -9,7 +9,7 @@ function createWindow(url) {
   win = new BrowserWindow({
     width: 1280,
     height: 800,
-    title: "Omni organize",
+    title: "Omni organizer",
   });
   win.loadURL(url);
 }

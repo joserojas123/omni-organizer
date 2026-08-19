@@ -12,7 +12,7 @@ import {
   type ObjectiveStatus,
   type Task,
   type TaskStatus,
-} from "@omni-organize/shared";
+} from "@omni-organizer/shared";
 import { HEADER_H, INSET_X, TaskGraph } from "@/lib/engine";
 import { buildSeed } from "@/lib/seed";
 import { loadAll, saveAll, type Snapshot } from "@/lib/api";
@@ -203,7 +203,7 @@ function escapeHtml(s: unknown): string {
     .replace(/>/g, "&gt;");
 }
 
-export interface OmniOrganize {
+export interface OmniOrganizer {
   state: State;
   graph: TaskGraph;
   setCanvasEl: (el: HTMLElement | null) => void;
@@ -284,7 +284,7 @@ export interface Actions {
   setHoverArrow: (key: string | null) => void;
 }
 
-export function useOmniOrganize(): OmniOrganize {
+export function useOmniOrganizer(): OmniOrganizer {
   const [state, setStateRaw] = useState<State>(initialState);
   const stateRef = useRef<State>(state);
   stateRef.current = state;

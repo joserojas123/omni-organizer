@@ -1,5 +1,5 @@
-import { OmniOrganize } from "@/components/OmniOrganize";
+import { OmniOrganizer } from "@/components/OmniOrganizer";
 
 export default function Page() {
-  return <OmniOrganize />;
+  return <OmniOrganizer />;
 }

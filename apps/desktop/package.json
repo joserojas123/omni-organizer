@@ -1,5 +1,5 @@
 {
-  "name": "@omni-organize/desktop",
+  "name": "@omni-organizer/desktop",
   "version": "0.1.0",
   "private": true,
   "main": "main.js",
@@ -17,8 +17,8 @@
     "serve-handler": "^6.1.6"
   },
   "build": {
-    "appId": "com.omniorganize.desktop",
-    "productName": "Omni organize",
+    "appId": "com.omniorganizer.desktop",
+    "productName": "Omni organizer",
     "files": ["main.js", "package.json"],
     "extraResources": [{ "from": "../web/out", "to": "web-out" }],
     "win": {

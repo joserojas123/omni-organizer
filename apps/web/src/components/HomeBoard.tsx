@@ -2,10 +2,10 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
-import type { Objective, Task, TaskStatus } from "@omni-organize/shared";
-import { OBJECTIVE_STATUS_META } from "@omni-organize/shared";
+import type { Objective, Task, TaskStatus } from "@omni-organizer/shared";
+import { OBJECTIVE_STATUS_META } from "@omni-organizer/shared";
 import { STATUS_META, escapeHtml, formatRelative } from "@/lib/engine";
-import type { CardKind, OmniOrganize } from "@/hooks/useOmniOrganize";
+import type { CardKind, OmniOrganizer } from "@/hooks/useOmniOrganizer";
 import { Star } from "./icons";
 
 /**
@@ -44,7 +44,7 @@ export function HomeBoard({
   projects,
   objectives,
 }: {
-  app: OmniOrganize;
+  app: OmniOrganizer;
   projects: Task[];
   objectives: Objective[];
 }) {
@@ -477,7 +477,7 @@ function statusBand(color: string): CSSProperties {
   };
 }
 
-function highlightOf(app: OmniOrganize, kind: CardKind, id: string) {
+function highlightOf(app: OmniOrganizer, kind: CardKind, id: string) {
   const drag = app.state.homeDrag;
   if (drag?.over && drag.over.id === id && drag.over.kind === kind)
     return drag.invalid ? "invalid" : "on";
@@ -491,7 +491,7 @@ function ProjectCard({
   status,
   register,
 }: {
-  app: OmniOrganize;
+  app: OmniOrganizer;
   project: Task;
   status: TaskStatus;
   register: (id: string, el: HTMLElement | null) => void;
@@ -580,7 +580,7 @@ function ObjectiveCard({
   objective,
   register,
 }: {
-  app: OmniOrganize;
+  app: OmniOrganizer;
   objective: Objective;
   register: (id: string, el: HTMLElement | null) => void;
 }) {

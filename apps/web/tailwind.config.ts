@@ -3,7 +3,7 @@ import type { Config } from "tailwindcss";
 /**
  * Strict-minimalism palette for Task designer: a light neutral surface, hairline
  * borders, and near-black ink. Color enters the product only through task-status
- * dots (see @omni-organize/shared STATUS_META), never as decoration.
+ * dots (see @omni-organizer/shared STATUS_META), never as decoration.
  */
 const config: Config = {
   content: [

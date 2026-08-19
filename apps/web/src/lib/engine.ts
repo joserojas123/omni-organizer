@@ -12,7 +12,7 @@ import {
   isProject as isProjectNode,
   type Task,
   type TaskStatus,
-} from "@omni-organize/shared";
+} from "@omni-organizer/shared";
 
 export { STATUS_META };
 export type { Task, TaskStatus };

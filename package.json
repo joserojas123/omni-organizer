@@ -1,17 +1,17 @@
 {
-  "name": "omni-organize",
+  "name": "omni-organizer",
   "private": true,
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev --filter=@omni-organize/web --filter=@omni-organize/api",
+    "dev": "turbo run dev --filter=@omni-organizer/web --filter=@omni-organizer/api",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "format": "prettier --write \"**/*.{ts,tsx,json,yaml,md}\"",
-    "postinstall": "pnpm --filter @omni-organize/shared build",
+    "postinstall": "pnpm --filter @omni-organizer/shared build",
     "db:up": "docker-compose -f docker-compose.dev.yml up -d",
     "db:down": "docker-compose -f docker-compose.dev.yml down",
-    "desktop:dev": "pnpm --filter @omni-organize/desktop dev",
-    "desktop:build": "pnpm --filter @omni-organize/desktop build"
+    "desktop:dev": "pnpm --filter @omni-organizer/desktop dev",
+    "desktop:build": "pnpm --filter @omni-organizer/desktop build"
   },
   "devDependencies": {
     "prettier": "^3.5.3",

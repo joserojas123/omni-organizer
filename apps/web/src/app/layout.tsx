@@ -8,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Omni organize",
+  title: "Omni organizer",
   description:
     "Áreas, proyectos, objetivos y tareas — un ámbito permanente arriba y un lienzo visual dentro de cada proyecto.",
 };

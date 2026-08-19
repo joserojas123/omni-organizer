@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import type { Task as TaskDto, TaskInput } from "@omni-organize/shared";
-import { canLinkProjects, checkTaskArea, isProject } from "@omni-organize/shared";
+import type { Task as TaskDto, TaskInput } from "@omni-organizer/shared";
+import { canLinkProjects, checkTaskArea, isProject } from "@omni-organizer/shared";
 import { PrismaService } from "../prisma/prisma.service";
 import type { Task as PrismaTask } from "@prisma/client";
 

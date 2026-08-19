@@ -14,7 +14,7 @@ import {
   taskSchema,
   type SyncTasksInput,
   type TaskInput,
-} from "@omni-organize/shared";
+} from "@omni-organizer/shared";
 import { ZodValidationPipe } from "../common/zod-validation.pipe";
 import { TasksService } from "./tasks.service";
 

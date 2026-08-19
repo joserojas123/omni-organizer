@@ -7,8 +7,8 @@ import type {
   Objective as ObjectiveDto,
   ObjectiveInput,
   ObjectivePatchInput,
-} from "@omni-organize/shared";
-import { canLinkObjective } from "@omni-organize/shared";
+} from "@omni-organizer/shared";
+import { canLinkObjective } from "@omni-organizer/shared";
 import type { Objective as PrismaObjective } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 

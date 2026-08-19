@@ -3,7 +3,7 @@
 import type { CSSProperties } from "react";
 import type { LayoutNode } from "@/lib/engine";
 import { escapeHtml } from "@/lib/engine";
-import type { OmniOrganize } from "@/hooks/useOmniOrganize";
+import type { OmniOrganizer } from "@/hooks/useOmniOrganizer";
 import { ArrowRight, ChevronRight } from "./icons";
 
 export interface NodeView {
@@ -21,7 +21,7 @@ export interface NodeView {
   nameWrap: "nowrap" | "normal";
 }
 
-export function CanvasNode({ app, view }: { app: OmniOrganize; view: NodeView }) {
+export function CanvasNode({ app, view }: { app: OmniOrganizer; view: NodeView }) {
   const { actions, setNameEl, state } = app;
   const {
     node: n,

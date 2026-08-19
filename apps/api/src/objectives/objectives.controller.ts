@@ -13,7 +13,7 @@ import {
   objectiveSchema,
   type ObjectiveInput,
   type ObjectivePatchInput,
-} from "@omni-organize/shared";
+} from "@omni-organizer/shared";
 import { ZodValidationPipe } from "../common/zod-validation.pipe";
 import { ObjectivesService } from "./objectives.service";
 

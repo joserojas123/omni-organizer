@@ -1,4 +1,4 @@
-import type { Area, Objective, Task } from "@omni-organize/shared";
+import type { Area, Objective, Task } from "@omni-organizer/shared";
 import { AREAS_KEY, OBJECTIVES_KEY, STORE_KEY, buildSeed } from "./seed";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") || "";

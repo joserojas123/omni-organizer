@@ -3,8 +3,8 @@ import type {
   Area as AreaDto,
   AreaInput,
   AreaPatchInput,
-} from "@omni-organize/shared";
-import { canDeleteArea } from "@omni-organize/shared";
+} from "@omni-organizer/shared";
+import { canDeleteArea } from "@omni-organizer/shared";
 import type { Area as PrismaArea } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 

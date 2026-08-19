@@ -1,4 +1,4 @@
-# Omni organize — Claude Context
+# Omni organizer — Claude Context
 
 ## Qué es
 
@@ -48,12 +48,12 @@ _famrize_ (Next.js + NestJS/Prisma + paquete shared en monorepo pnpm/Turbo).
   recursivo, tamaños, resolución de estado, routing de flechas (bézier con
   esquiva de obstáculos), reglas de enlace entre tareas. Port fiel y puro del
   script del export. **Cámbialo aquí si cambia la geometría/lógica.**
-- `src/hooks/useOmniOrganize.ts` — port de la clase `Component` del export a un
+- `src/hooks/useOmniOrganizer.ts` — port de la clase `Component` del export a un
   hook. Mantiene las tres colecciones y todos los handlers (drag, anidado,
   secuencia, zoom/pan, undo/redo, edición de nombre con enlaces, vínculos del
   inicio, persistencia debounced). Usa un `stateRef` para lecturas síncronas
   estilo `this.state`.
-- `src/components/` — `OmniOrganize` (shell + overlays + menú contextual),
+- `src/components/` — `OmniOrganizer` (shell + overlays + menú contextual),
   `HomeScreen` (franja de área + sección inferior), `HomeBoard` (rejilla de
   cuatro franjas y curvas), `EditorScreen`, `CanvasNode`, `icons`.
 - `src/lib/api.ts` — carga/guarda áreas, tareas y objetivos. Sin
@@ -161,12 +161,12 @@ vínculo. `areaId` es inmutable después de crear.
   colgando.
 - `GET/POST/PATCH/DELETE` para `/api/areas` y `/api/objectives`. El PATCH de un
   objetivo **no acepta `areaId`**: no hay forma de moverlo de área.
-- Validación con `ZodValidationPipe` + esquemas de `@omni-organize/shared`.
+- Validación con `ZodValidationPipe` + esquemas de `@omni-organizer/shared`.
 - Migraciones en `prisma/migrations/`. Sin seed: la app arranca vacía.
 
 ## Despliegue
 
-- **Local**: `pnpm db:up` → `pnpm --filter @omni-organize/api db:deploy` →
+- **Local**: `pnpm db:up` → `pnpm --filter @omni-organizer/api db:deploy` →
   `pnpm dev`.
 - **Vercel**: solo `apps/web` (`vercel.json` filtra el build por Turbo). Corre
   sin backend si no defines `NEXT_PUBLIC_API_URL`.
@@ -175,7 +175,7 @@ vínculo. `areaId` es inmutable después de crear.
 ## Al trabajar aquí
 
 - Mantén sentence case en etiquetas/botones; nada de Title Case ni mayúsculas.
-- La lógica de lienzo pertenece a `engine.ts` (puro) + `useOmniOrganize.ts`
+- La lógica de lienzo pertenece a `engine.ts` (puro) + `useOmniOrganizer.ts`
   (estado); las reglas entre Áreas, Proyectos y Objetivos pertenecen a
   `packages/shared/src/rules.ts`. Los componentes solo pintan view-models.
 - Sin emoji; iconos SVG de trazo. La paleta es la de `STATUS_META` /

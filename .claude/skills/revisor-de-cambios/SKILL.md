@@ -1,9 +1,9 @@
 ---
 name: revisor-de-cambios
-description: Resume en español los cambios pendientes (git diff) en omni-organize y propone un mensaje de commit corto con el mismo estilo del historial del repo. Actívala cuando el usuario diga cosas como "revisa mis cambios", "dame la descripción para el commit", "¿qué cambié?" — y OBLIGATORIAMENTE de forma proactiva, sin que lo pidan, justo después de terminar cualquier modificación de código en este repositorio (un fix, una feature, un ajuste chico, lo que sea), antes de decir que la tarea está lista. Esta skill es un paso fijo del flujo de trabajo en este repo, no una utilidad opcional — úsala siempre que el diff de trabajo cambió.
+description: Resume en español los cambios pendientes (git diff) en omni-organizer y propone un mensaje de commit corto con el mismo estilo del historial del repo. Actívala cuando el usuario diga cosas como "revisa mis cambios", "dame la descripción para el commit", "¿qué cambié?" — y OBLIGATORIAMENTE de forma proactiva, sin que lo pidan, justo después de terminar cualquier modificación de código en este repositorio (un fix, una feature, un ajuste chico, lo que sea), antes de decir que la tarea está lista. Esta skill es un paso fijo del flujo de trabajo en este repo, no una utilidad opcional — úsala siempre que el diff de trabajo cambió.
 ---
 
-# Revisor de cambios (omni-organize)
+# Revisor de cambios (omni-organizer)
 
 Describe qué cambió y propone el mensaje de commit. No es una revisión de
 calidad ni busca bugs — solo traduce el diff a una descripción legible y a
@@ -28,7 +28,7 @@ el resumen ahí; si no dijo nada, cubre todo lo que aparezca modificado.
 
 En español, breve, agrupando por archivo o por concepto si varios archivos
 forman un solo cambio coherente (por ejemplo, un fix que toca `engine.ts` y
-su caller en `useOmniOrganize.ts` es un solo punto, no dos). Describe qué
+su caller en `useOmniOrganizer.ts` es un solo punto, no dos). Describe qué
 cambió y, cuando no sea obvio del código, por qué — no repitas el diff línea
 por línea.
 

@@ -13,7 +13,7 @@ import {
   areaSchema,
   type AreaInput,
   type AreaPatchInput,
-} from "@omni-organize/shared";
+} from "@omni-organizer/shared";
 import { ZodValidationPipe } from "../common/zod-validation.pipe";
 import { AreasService } from "./areas.service";
 

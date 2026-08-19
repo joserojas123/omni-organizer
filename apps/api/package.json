@@ -1,5 +1,5 @@
 {
-  "name": "@omni-organize/api",
+  "name": "@omni-organizer/api",
   "version": "0.0.1",
   "private": true,
   "license": "UNLICENSED",
@@ -23,7 +23,7 @@
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
     "@prisma/client": "^6.3.0",
-    "@omni-organize/shared": "workspace:*",
+    "@omni-organizer/shared": "workspace:*",
     "dotenv": "^16.4.7",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",

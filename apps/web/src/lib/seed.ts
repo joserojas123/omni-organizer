@@ -1,4 +1,4 @@
-import type { Area, Objective, Task } from "@omni-organize/shared";
+import type { Area, Objective, Task } from "@omni-organizer/shared";
 
 /**
  * The app starts completely empty: no default area is ever created. The home
@@ -13,6 +13,6 @@ export function buildSeed(): {
   return { areas: [], tasks: [], objectives: [] };
 }
 
-export const AREAS_KEY = "omni-organize:areas:v1";
-export const STORE_KEY = "omni-organize:tasks:v1";
-export const OBJECTIVES_KEY = "omni-organize:objectives:v1";
+export const AREAS_KEY = "omni-organizer:areas:v1";
+export const STORE_KEY = "omni-organizer:tasks:v1";
+export const OBJECTIVES_KEY = "omni-organizer:objectives:v1";

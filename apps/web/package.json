@@ -1,5 +1,5 @@
 {
-  "name": "@omni-organize/web",
+  "name": "@omni-organizer/web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.1.1",
-    "@omni-organize/shared": "workspace:*",
+    "@omni-organizer/shared": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.469.0",

@@ -1,4 +1,4 @@
-# Omni organize
+# Omni organizer
 
 Organizador visual con cuatro conceptos y una sola jerarquía:
 
@@ -61,7 +61,7 @@ Requiere Node ≥ 20, pnpm ≥ 9 y Docker corriendo.
 
    ```bash
    git clone <url-del-repo>
-   cd omni-organize
+   cd omni-organizer
    pnpm install
    ```
 
@@ -81,7 +81,7 @@ Requiere Node ≥ 20, pnpm ≥ 9 y Docker corriendo.
    falla si Postgres todavía no acepta conexiones:
 
    ```bash
-   docker ps --filter name=omni-organize-postgres
+   docker ps --filter name=omni-organizer-postgres
    ```
 
    > Si falla con `Bind for 0.0.0.0:5434 failed: port is already allocated`,
@@ -115,7 +115,7 @@ Requiere Node ≥ 20, pnpm ≥ 9 y Docker corriendo.
    ejemplo):
 
    ```bash
-   pnpm --filter @omni-organize/api db:deploy
+   pnpm --filter @omni-organizer/api db:deploy
    ```
 
 6. **Arranca api + web en paralelo** (Turborepo orquesta ambos):
@@ -145,8 +145,8 @@ Requiere Node ≥ 20, pnpm ≥ 9 y Docker corriendo.
    confirma que llegó a Postgres, no solo al navegador:
 
    ```bash
-   docker exec omni-organize-postgres \
-     psql -U omniorganize -d omniorganize -c "SELECT id, name FROM areas;"
+   docker exec omni-organizer-postgres \
+     psql -U omniorganizer -d omniorganizer -c "SELECT id, name FROM areas;"
    ```
 
 8. **Inspecciona la base de datos** (opcional). Postgres no habla HTTP, así
@@ -156,7 +156,7 @@ Requiere Node ≥ 20, pnpm ≥ 9 y Docker corriendo.
    - **Prisma Studio** (UI web, la forma más simple):
 
      ```bash
-     pnpm --filter @omni-organize/api db:studio
+     pnpm --filter @omni-organizer/api db:studio
      ```
 
      Abre una interfaz en `http://localhost:5555` (Studio corre como una app
@@ -166,25 +166,25 @@ Requiere Node ≥ 20, pnpm ≥ 9 y Docker corriendo.
      conectando con la cadena de conexión de `apps/api/.env`:
 
      ```
-     postgresql://omniorganize:omniorganize@localhost:5434/omniorganize?schema=public
+     postgresql://omniorganizer:omniorganizer@localhost:5434/omniorganizer?schema=public
      ```
 
      o por campos separados: host `localhost`, puerto `5434`, usuario y
-     contraseña `omniorganize`, base de datos `omniorganize`.
+     contraseña `omniorganizer`, base de datos `omniorganizer`.
 
 9. **Para detener todo**: `Ctrl+C` en el proceso de `pnpm dev`, luego
    `pnpm db:down` para apagar el contenedor de Postgres, y finalmente puedes
    cerrar Docker Desktop.
 
    Los datos **sobreviven** a `pnpm db:down` porque viven en el volumen
-   `omni-organize-dev_postgres_data`, no en el contenedor. Para borrarlos de
+   `omni-organizer-dev_postgres_data`, no en el contenedor. Para borrarlos de
    verdad hace falta tumbar también el volumen:
 
    ```bash
    docker compose -f docker-compose.dev.yml down -v   # ⚠️ borra todos los datos
    ```
 
-> Atajo útil: `pnpm --filter @omni-organize/api db:reset` recrea la base de
+> Atajo útil: `pnpm --filter @omni-organizer/api db:reset` recrea la base de
 > datos desde cero (vacía) sin tocar el contenedor.
 
 ### Problemas frecuentes
@@ -237,8 +237,8 @@ un proyecto, su id desaparece de los `linkedProjectIds` de todos los objetivos.
 | `pnpm dev` | api + web en paralelo (Turborepo) |
 | `pnpm build` | build de todo el monorepo |
 | `pnpm db:up` / `pnpm db:down` | PostgreSQL local |
-| `pnpm --filter @omni-organize/api db:studio` | Prisma Studio |
-| `pnpm --filter @omni-organize/api db:reset` | recrea la DB desde cero (vacía) |
+| `pnpm --filter @omni-organizer/api db:studio` | Prisma Studio |
+| `pnpm --filter @omni-organizer/api db:reset` | recrea la DB desde cero (vacía) |
 
 ## Despliegue en Vercel
 

@@ -1,11 +1,11 @@
 "use client";
 
-import { useOmniOrganize } from "@/hooks/useOmniOrganize";
+import { useOmniOrganizer } from "@/hooks/useOmniOrganizer";
 import {
   OBJECTIVE_STATUSES,
   OBJECTIVE_STATUS_META,
   type ObjectiveStatus,
-} from "@omni-organize/shared";
+} from "@omni-organizer/shared";
 import { STATUS_META, type TaskStatus } from "@/lib/engine";
 import { HomeScreen } from "./HomeScreen";
 import { EditorScreen } from "./EditorScreen";
@@ -18,8 +18,8 @@ const STATUS_ORDER: TaskStatus[] = [
   "completada",
 ];
 
-export function OmniOrganize() {
-  const app = useOmniOrganize();
+export function OmniOrganizer() {
+  const app = useOmniOrganizer();
   const { state, graph, actions } = app;
 
   const { eff, blockers, canComplete, activeChildren } = graph.statusResolver();

@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useRef, type CSSProperties } from "react";
-import type { Area } from "@omni-organize/shared";
-import { isProject } from "@omni-organize/shared";
+import type { Area } from "@omni-organizer/shared";
+import { isProject } from "@omni-organizer/shared";
 import { STATUS_META, formatRelative, type TaskStatus } from "@/lib/engine";
-import type { OmniOrganize } from "@/hooks/useOmniOrganize";
+import type { OmniOrganizer } from "@/hooks/useOmniOrganizer";
 import { BOARD_MIN_W, HomeBoard } from "./HomeBoard";
 import { ChevronRight, Star } from "./icons";
 
@@ -18,7 +18,7 @@ const STATUS_ORDER: TaskStatus[] = [
 /** The green tint of the area strip — the existing "completada" tint, reused. */
 const AREA_TINT = STATUS_META.completada.tint;
 
-export function HomeScreen({ app }: { app: OmniOrganize }) {
+export function HomeScreen({ app }: { app: OmniOrganizer }) {
   const { state, graph, actions } = app;
 
   const padH = state.narrow ? "14px 16px" : "18px 28px";
@@ -66,7 +66,7 @@ export function HomeScreen({ app }: { app: OmniOrganize }) {
             whiteSpace: "nowrap",
           }}
         >
-          Omni organize
+          Omni organizer
         </div>
         <input
           value={state.search}
@@ -134,7 +134,7 @@ export function HomeScreen({ app }: { app: OmniOrganize }) {
 
 /* ── Area strip ──────────────────────────────────────────────────────── */
 
-function AreaStrip({ app, area }: { app: OmniOrganize; area: Area }) {
+function AreaStrip({ app, area }: { app: OmniOrganizer; area: Area }) {
   const { state, actions } = app;
   const others = [...state.areas].sort((a, b) => b.modifiedAt - a.modifiedAt);
   const nameRef = useRef<HTMLSpanElement | null>(null);
@@ -260,7 +260,7 @@ function AreaStrip({ app, area }: { app: OmniOrganize; area: Area }) {
 
 /* ── Empty state: no areas at all ────────────────────────────────────── */
 
-function EmptyAreas({ app }: { app: OmniOrganize }) {
+function EmptyAreas({ app }: { app: OmniOrganizer }) {
   return (
     <>
       <div style={areaStripBox}>
@@ -300,7 +300,7 @@ function EmptyAreas({ app }: { app: OmniOrganize }) {
 
 /* ── Bottom section: activities by status ────────────────────────────── */
 
-function ActivitiesByStatus({ app }: { app: OmniOrganize }) {
+function ActivitiesByStatus({ app }: { app: OmniOrganizer }) {
   const { state, graph, actions } = app;
   const { eff } = graph.statusResolver();
   const areaId = state.currentAreaId;

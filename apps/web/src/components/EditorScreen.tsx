@@ -10,11 +10,11 @@ import {
   type LayoutNode,
   type LayoutResult,
 } from "@/lib/engine";
-import type { OmniOrganize } from "@/hooks/useOmniOrganize";
+import type { OmniOrganizer } from "@/hooks/useOmniOrganizer";
 import { CanvasNode, type NodeView } from "./CanvasNode";
 import { Trash } from "./icons";
 
-export function EditorScreen({ app }: { app: OmniOrganize }) {
+export function EditorScreen({ app }: { app: OmniOrganizer }) {
   const { state, graph, actions, setCanvasEl } = app;
   const { eff, blockers } = graph.statusResolver();
   const editingTaskId = state.editingTaskId;
@@ -174,7 +174,7 @@ export function EditorScreen({ app }: { app: OmniOrganize }) {
             borderRadius: 8,
           }}
         >
-          Omni organize
+          Omni organizer
         </div>
         <div
           style={{
