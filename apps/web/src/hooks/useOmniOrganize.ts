@@ -1257,6 +1257,9 @@ export function useOmniOrganize(): OmniOrganize {
       if (e.button !== 0) return;
       if (!onFree) return;
       if (isSecondClick("__canvas")) {
+        // Stop the browser from moving focus to the canvas on this click; the
+        // node being created wants it for its name field.
+        e.preventDefault();
         const p = pointerLocal(e);
         createTaskAt(stateRef.current.editingTaskId!, p.x - 90, p.y - 19);
       }
@@ -1746,8 +1749,9 @@ export function useOmniOrganize(): OmniOrganize {
   const setNameEl = useCallback((el: HTMLElement | null) => {
     extRef.current.nameEl = el;
     if (el) {
-      // Fill the contentEditable name once and place the caret at the end. It
-      // serves canvas tasks and objective cards alike.
+      // Fill the contentEditable name once and select all of it, so the
+      // placeholder can be typed straight over. Serves canvas tasks and
+      // objective cards alike.
       const s = stateRef.current;
       const id = s.editingNameId ?? s.editingObjectiveNameId;
       const source = s.editingObjectiveNameId
@@ -1758,12 +1762,19 @@ export function useOmniOrganize(): OmniOrganize {
       if (source && el.dataset.filled !== id) {
         el.dataset.filled = id!;
         el.innerHTML = source.nameHtml ? source.nameHtml : escapeHtml(source.name);
-        el.focus();
-        const r = document.createRange();
-        r.selectNodeContents(el);
-        const sel = window.getSelection();
-        sel?.removeAllRanges();
-        sel?.addRange(r);
+        // Focus AFTER the current event finishes. This ref runs while the click
+        // that created the node is still being dispatched: focusing now lets the
+        // browser hand focus back to the canvas a moment later, and that blur
+        // commits the name and closes the editor before a single key is pressed.
+        setTimeout(() => {
+          if (!el.isConnected) return;
+          el.focus();
+          const r = document.createRange();
+          r.selectNodeContents(el);
+          const sel = window.getSelection();
+          sel?.removeAllRanges();
+          sel?.addRange(r);
+        }, 0);
       }
     }
   }, []);
