@@ -391,7 +391,10 @@ function ProjectDescription({
         // A third of the screen, centered under the name.
         width: "33.33vw",
         maxWidth: "100%",
-        textAlign: "center",
+        // Justified body with a centered last line: the block reads as centered
+        // under the title without leaving the final line hanging to one side.
+        textAlign: "justify",
+        textAlignLast: "center",
         border: "none",
         background: "transparent",
         resize: "none",
