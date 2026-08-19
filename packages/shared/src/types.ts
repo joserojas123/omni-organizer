@@ -37,6 +37,12 @@ export interface Task {
   modifiedAt: number;
   parentId: string | null;
   /**
+   * Short optional description. Only Projects ever get one: they are the only
+   * task the editor opens, and it is edited there, under the name. Nested tasks
+   * leave it null.
+   */
+  description?: string | null;
+  /**
    * Owning Area. Mandatory and immutable on Projects (`parentId === null`);
    * null on nested tasks, which inherit the Area of the Project at the top of
    * their ancestor chain.

@@ -225,6 +225,26 @@ export function EditorScreen({ app }: { app: OmniOrganize }) {
               }}
             />
           </div>
+
+          {/* The project's description, right under its name. Empty shows only
+              its placeholder, so it stays out of the way until it is used. */}
+          <input
+            value={editingTask?.description ?? ""}
+            onChange={(e) => actions.onEditingDescriptionChange(e.target.value)}
+            placeholder="Añade una descripción"
+            title="Descripción del proyecto"
+            style={{
+              textAlign: "center",
+              border: "none",
+              background: "transparent",
+              fontSize: 12,
+              color: "#55554f",
+              outline: "none",
+              width: "100%",
+              maxWidth: 420,
+              minWidth: 160,
+            }}
+          />
           <button
             onClick={() => editingTaskId && actions.requestDelete({ kind: "task", id: editingTaskId })}
             title="Eliminar"

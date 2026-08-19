@@ -13,6 +13,7 @@ function toDto(row: PrismaTask): TaskDto {
     favorite: row.favorite,
     modifiedAt: Number(row.modifiedAt),
     parentId: row.parentId,
+    description: row.description,
     areaId: row.areaId,
     seqNext: row.seqNext,
     x: row.x,
@@ -65,6 +66,7 @@ export class TasksService {
             favorite: t.favorite,
             modifiedAt: BigInt(t.modifiedAt),
             parentId: t.parentId,
+            description: t.description ?? null,
             // Only projects carry an area; nested tasks inherit it from the
             // project above them, so storing one there would be a second,
             // divergeable source of truth.
@@ -96,6 +98,7 @@ export class TasksService {
         favorite: input.favorite,
         modifiedAt: BigInt(input.modifiedAt),
         parentId: input.parentId,
+        description: input.description ?? null,
         areaId: isProject(input) ? input.areaId : null,
         seqNext: input.seqNext,
         x: input.x,

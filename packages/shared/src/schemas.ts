@@ -38,6 +38,7 @@ export const taskSchema = z.object({
   favorite: z.boolean(),
   modifiedAt: z.number().int().nonnegative(),
   parentId: z.string().nullable(),
+  description: z.string().nullable().optional().transform((v) => v ?? null),
   // Nullable in the schema because nested tasks have none; the "a root task
   // always has an area" rule is enforced in the domain layer (checkTaskArea),
   // which is the only place that can see the whole graph.

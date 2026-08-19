@@ -37,7 +37,9 @@ model Task {
   name       String   @default("Sin nombre")
   status     String   @default("pendiente")
   favorite   Boolean  @default(false)
-  modifiedAt BigInt    @map("modified_at")
+  modifiedAt BigInt   @map("modified_at")
+  /// Only Projects get one; it is edited in the canvas top bar, under the name.
+  description String?
   parentId   String?  @map("parent_id")
   parent     Task?    @relation("TaskChildren", fields: [parentId], references: [id], onDelete: Cascade)
   children   Task[]   @relation("TaskChildren")

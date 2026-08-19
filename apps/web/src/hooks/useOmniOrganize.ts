@@ -254,6 +254,7 @@ export interface Actions {
   dismissNotice: () => void;
   /* names + links */
   onEditingNameChange: (v: string) => void;
+  onEditingDescriptionChange: (v: string) => void;
   startEditName: (id: string) => void;
   stopEditName: () => void;
   commitNameHtml: (id: string, el: HTMLElement) => void;
@@ -905,6 +906,21 @@ export function useOmniOrganize(): OmniOrganize {
     (v: string) => {
       snapshot("name:" + stateRef.current.editingTaskId);
       updateTask(stateRef.current.editingTaskId!, { name: v, modifiedAt: Date.now() });
+    },
+    [snapshot, updateTask],
+  );
+
+  /**
+   * The description of whatever the editor has open — always a Project, since
+   * that is the only thing openable. Empty collapses to null so "no
+   * description" has a single representation.
+   */
+  const onEditingDescriptionChange = useCallback(
+    (v: string) => {
+      const id = stateRef.current.editingTaskId;
+      if (!id) return;
+      snapshot("desc:" + id);
+      updateTask(id, { description: v === "" ? null : v, modifiedAt: Date.now() });
     },
     [snapshot, updateTask],
   );
@@ -1815,6 +1831,7 @@ export function useOmniOrganize(): OmniOrganize {
     deleteTask,
     dismissNotice,
     onEditingNameChange,
+    onEditingDescriptionChange,
     startEditName,
     stopEditName,
     commitNameHtml,

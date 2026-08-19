@@ -14,6 +14,11 @@ Organizador visual con cuatro conceptos y una sola jerarquía:
   descuida) y **no se puede eliminar mientras tenga contenido**.
 - **Proyecto** — **no es un tipo nuevo**: es una `Task` con `parentId === null`
   y un `areaId` obligatorio e inmutable. Contiene Tareas, nunca otro Proyecto.
+  Admite además una `description` opcional, que se edita **dentro del lienzo**,
+  bajo el nombre en la barra superior del editor. El campo vive en `Task`
+  porque un Proyecto *es* una Task, pero en la práctica solo lo usan los
+  Proyectos: son lo único que el editor abre. Las Tareas anidadas lo dejan
+  `null` y no lo muestran en ningún sitio.
 - **Tarea** — sin cambios respecto del modelo original. Siempre vive dentro de
   un Proyecto; su cadena de ancestros termina en uno, nunca en un Área.
 - **Objetivo** — colección aparte de `tasks`. No vive en ningún lienzo: sin
