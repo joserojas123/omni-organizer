@@ -305,9 +305,15 @@ function ActivitiesByStatus({ app }: { app: OmniOrganize }) {
   const { eff } = graph.statusResolver();
   const areaId = state.currentAreaId;
 
-  /** Tasks of the selected area, at every level. Objectives are not tasks, so
-   *  they never show up here — their only visible home is the right column. */
+  /**
+   * Tasks of the selected area, at every level inside its projects.
+   *
+   * The projects themselves are left out: they already have their own column
+   * right above, and this table is about the work *within* them. Objectives
+   * never show up either — they are not tasks at all.
+   */
   const inArea = graph.tasks.filter((t) => {
+    if (isProject(t)) return false;
     let cur = t;
     const seen = new Set<string>();
     while (cur.parentId && !seen.has(cur.id)) {
