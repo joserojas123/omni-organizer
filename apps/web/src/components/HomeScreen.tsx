@@ -121,7 +121,7 @@ export function HomeScreen({ app }: { app: OmniOrganize }) {
               <div style={{ height: 20 }} />
               <HomeBoard app={app} projects={projects} objectives={objectives} />
               <div style={{ height: 28 }} />
-              <ActivitiesByStatus app={app} areaName={area.name} />
+              <ActivitiesByStatus app={app} />
             </>
           ) : (
             <EmptyAreas app={app} />
@@ -300,7 +300,7 @@ function EmptyAreas({ app }: { app: OmniOrganize }) {
 
 /* ── Bottom section: activities by status ────────────────────────────── */
 
-function ActivitiesByStatus({ app, areaName }: { app: OmniOrganize; areaName: string }) {
+function ActivitiesByStatus({ app }: { app: OmniOrganize }) {
   const { state, graph, actions } = app;
   const { eff } = graph.statusResolver();
   const areaId = state.currentAreaId;
@@ -319,15 +319,19 @@ function ActivitiesByStatus({ app, areaName }: { app: OmniOrganize; areaName: st
     return isProject(cur) && cur.areaId === areaId;
   });
 
-  const pathOf = (id: string): string => {
+  /**
+   * Ancestor chain of the task, outermost first. The area is deliberately NOT
+   * part of it: the whole table already belongs to the selected area, so
+   * repeating its name on every row only pushes the useful part out of view.
+   */
+  const pathOf = (id: string): string[] => {
     const parts: string[] = [];
     let cur = graph.byId(id)?.parentId ? graph.byId(graph.byId(id)!.parentId!) : null;
     while (cur) {
       parts.unshift(cur.name);
       cur = cur.parentId ? graph.byId(cur.parentId) : null;
     }
-    // One level more than before: the area now heads the path.
-    return [areaName, ...parts].join(" - ");
+    return parts;
   };
 
   const rows = inArea
@@ -399,7 +403,7 @@ function ActivitiesByStatus({ app, areaName }: { app: OmniOrganize; areaName: st
           </div>
         ) : (
           rows.map((t) => {
-            const full = pathOf(t.id) + " - " + t.name;
+            const full = [...pathOf(t.id), t.name].join(" - ");
             const root = (() => {
               let cur = t;
               while (cur.parentId) cur = graph.byId(cur.parentId)!;

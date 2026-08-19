@@ -130,9 +130,13 @@ vínculo. `areaId` es inmutable después de crear.
 - Por debajo de 900 px **no se apila**: el tablero mantiene su ancho mínimo y la
   pantalla se desplaza en horizontal, para que los canales no se queden sin sitio.
 - Sección inferior "Actividades por estado": tareas del **área seleccionada** a
-  todos los niveles, ruta `Área - Proyecto - Tarea - …`, orden por fecha de
+  todos los niveles, ruta `Proyecto - Tarea - …`, orden por fecha de
   modificación descendente, y el filtro vuelve a "En progreso" al entrar. **Los
   Objetivos no aparecen aquí**, porque no son tareas.
+- ⚠️ La ruta **no incluye el Área**, aunque la especificación original la pedía:
+  la tabla entera pertenece ya al área seleccionada, así que repetir su nombre
+  en cada fila solo desplazaba la parte útil fuera de la vista. Decidido a mano,
+  no es un olvido.
 
 ## Backend
 
