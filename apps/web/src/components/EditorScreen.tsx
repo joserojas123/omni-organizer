@@ -186,52 +186,54 @@ export function EditorScreen({ app }: { app: OmniOrganize }) {
             minWidth: 0,
           }}
         >
+          {/* Breadcrumb on its own line: the name below needs the full width to
+              wrap into, instead of sharing a line with it. */}
           <div
             style={{
               display: "flex",
-              alignItems: "baseline",
-              gap: 6,
-              maxWidth: "100%",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 2,
+              width: "100%",
               minWidth: 0,
             }}
           >
-            {crumbs.map((c) => (
-              <span
-                key={c}
+            {crumbs.length > 0 && (
+              <div
                 style={{
                   fontSize: 12,
                   color: "#8a8a83",
-                  whiteSpace: "nowrap",
-                  flexShrink: 0,
+                  textAlign: "center",
+                  maxWidth: "100%",
                 }}
               >
-                {c} ›
-              </span>
-            ))}
-            <input
+                {crumbs.join(" › ")}
+              </div>
+            )}
+            <AutoGrowText
               value={editingTask ? editingTask.name : ""}
-              onChange={(e) => actions.onEditingNameChange(e.target.value)}
+              onChange={actions.onEditingNameChange}
+              title="Nombre del proyecto"
+              style={{ fontSize: 14, fontWeight: 500, color: "#1c1c1a" }}
+            />
+            {/* The project's description, right under its name. Empty shows only
+                its placeholder, so it stays out of the way until it is used. */}
+            <AutoGrowText
+              value={editingTask?.description ?? ""}
+              onChange={actions.onEditingDescriptionChange}
+              placeholder="Añade una descripción"
+              title="Descripción del proyecto"
               style={{
-                textAlign: crumbs.length ? "left" : "center",
-                border: "none",
-                background: "transparent",
-                fontSize: 14,
-                fontWeight: 500,
-                color: "#1c1c1a",
-                outline: "none",
-                width: "100%",
-                maxWidth: 320,
-                minWidth: 120,
+                fontSize: 12,
+                color: "#55554f",
+                // Justified body with a centered last line: the block reads as
+                // centered under the title without leaving the final line
+                // hanging to one side.
+                textAlign: "justify",
+                textAlignLast: "center",
               }}
             />
           </div>
-
-          {/* The project's description, right under its name. Empty shows only
-              its placeholder, so it stays out of the way until it is used. */}
-          <ProjectDescription
-            value={editingTask?.description ?? ""}
-            onChange={actions.onEditingDescriptionChange}
-          />
           <button
             onClick={() => editingTaskId && actions.requestDelete({ kind: "task", id: editingTaskId })}
             title="Eliminar"
@@ -357,16 +359,22 @@ export function EditorScreen({ app }: { app: OmniOrganize }) {
 }
 
 /**
- * The project's description. A textarea rather than an input so a long text
- * wraps instead of scrolling out of sight, and it grows to fit: the whole
- * description is always visible, however many lines it takes.
+ * A one-line-looking text field that grows instead of scrolling: a textarea,
+ * not an input, so long text wraps and stays fully visible however many lines
+ * it takes. Used for both the project's name and its description.
  */
-function ProjectDescription({
+function AutoGrowText({
   value,
   onChange,
+  placeholder,
+  title,
+  style,
 }: {
   value: string;
   onChange: (v: string) => void;
+  placeholder?: string;
+  title?: string;
+  style?: CSSProperties;
 }) {
   const ref = useRef<HTMLTextAreaElement | null>(null);
 
@@ -379,32 +387,46 @@ function ProjectDescription({
     el.style.height = `${el.scrollHeight}px`;
   }, [value]);
 
+  /* A narrower box rewraps the text into more lines without the value changing,
+     so the height has to be recomputed on width changes too — otherwise the
+     text clips after a window resize. Only width changes are acted on; reacting
+     to our own height change would loop. */
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    let lastWidth = el.clientWidth;
+    const ro = new ResizeObserver(() => {
+      if (el.clientWidth === lastWidth) return;
+      lastWidth = el.clientWidth;
+      el.style.height = "auto";
+      el.style.height = `${el.scrollHeight}px`;
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   return (
     <textarea
       ref={ref}
       value={value}
       onChange={(e) => onChange(e.target.value)}
       rows={1}
-      placeholder="Añade una descripción"
-      title="Descripción del proyecto"
+      placeholder={placeholder}
+      title={title}
       style={{
-        // A third of the screen, centered under the name.
+        // A third of the screen, centered in the top bar.
         width: "33.33vw",
         maxWidth: "100%",
-        // Justified body with a centered last line: the block reads as centered
-        // under the title without leaving the final line hanging to one side.
-        textAlign: "justify",
-        textAlignLast: "center",
+        textAlign: "center",
         border: "none",
         background: "transparent",
         resize: "none",
         overflow: "hidden",
         fontFamily: "inherit",
-        fontSize: 12,
         lineHeight: "17px",
-        color: "#55554f",
         outline: "none",
         padding: 0,
+        ...style,
       }}
     />
   );
