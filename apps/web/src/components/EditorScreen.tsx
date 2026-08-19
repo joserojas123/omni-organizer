@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import { useLayoutEffect, useRef, type CSSProperties } from "react";
 import {
   HEADER_H,
   INSET_X,
@@ -228,22 +228,9 @@ export function EditorScreen({ app }: { app: OmniOrganize }) {
 
           {/* The project's description, right under its name. Empty shows only
               its placeholder, so it stays out of the way until it is used. */}
-          <input
+          <ProjectDescription
             value={editingTask?.description ?? ""}
-            onChange={(e) => actions.onEditingDescriptionChange(e.target.value)}
-            placeholder="Añade una descripción"
-            title="Descripción del proyecto"
-            style={{
-              textAlign: "center",
-              border: "none",
-              background: "transparent",
-              fontSize: 12,
-              color: "#55554f",
-              outline: "none",
-              width: "100%",
-              maxWidth: 420,
-              minWidth: 160,
-            }}
+            onChange={actions.onEditingDescriptionChange}
           />
           <button
             onClick={() => editingTaskId && actions.requestDelete({ kind: "task", id: editingTaskId })}
@@ -366,6 +353,57 @@ export function EditorScreen({ app }: { app: OmniOrganize }) {
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * The project's description. A textarea rather than an input so a long text
+ * wraps instead of scrolling out of sight, and it grows to fit: the whole
+ * description is always visible, however many lines it takes.
+ */
+function ProjectDescription({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const ref = useRef<HTMLTextAreaElement | null>(null);
+
+  // Reset to `auto` before reading scrollHeight so the box can shrink again
+  // when text is deleted, not only grow.
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [value]);
+
+  return (
+    <textarea
+      ref={ref}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      rows={1}
+      placeholder="Añade una descripción"
+      title="Descripción del proyecto"
+      style={{
+        // A third of the screen, centered under the name.
+        width: "33.33vw",
+        maxWidth: "100%",
+        textAlign: "center",
+        border: "none",
+        background: "transparent",
+        resize: "none",
+        overflow: "hidden",
+        fontFamily: "inherit",
+        fontSize: 12,
+        lineHeight: "17px",
+        color: "#55554f",
+        outline: "none",
+        padding: 0,
+      }}
+    />
   );
 }
 
